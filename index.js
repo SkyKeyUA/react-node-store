@@ -5,11 +5,14 @@ import express from 'express';
 import cors from 'cors';
 import DataBase from './db.js';
 import models from './models/models.js';
+import { initRoutes } from './routes/index.js';
 
 const PORT = process.env.PORT || 7000;
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+initRoutes(app);
 
 const start = async () => {
   try {
