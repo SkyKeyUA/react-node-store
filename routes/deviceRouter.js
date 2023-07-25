@@ -1,11 +1,12 @@
 /** @format */
 
 import express from 'express';
+import { deviceController } from '../controllers/deviceController.js';
 
 const deviceRouter = express.Router();
 
-deviceRouter.post('/');
-deviceRouter.get('/');
-deviceRouter.get('/:id');
+deviceRouter.post('/', deviceController.create);
+deviceRouter.get('/', deviceController.getAll);
+deviceRouter.get('/:id', deviceController.getOne);
 
 export default deviceRouter;
