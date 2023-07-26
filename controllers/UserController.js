@@ -5,6 +5,12 @@ import bcrypt from 'bcrypt';
 import { Basket, User } from '../models/models.js';
 import jwt from 'jsonwebtoken';
 
+const generateJwt = (id, email, role) => {
+  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, {
+    expiresIn: '24h',
+  });
+};
+
 class UserController {
   async registration(req, res, next) {
     try {
@@ -19,9 +25,7 @@ class UserController {
       const hashPassword = await bcrypt.hash(password, 5);
       const user = await User.create({ email, role, password: hashPassword });
       const basket = await Basket.create({ userId: user.id });
-      const token = jwt.sign({ id: user.id, email, role }, process.env.SECRET_KEY, {
-        expiresIn: '24h',
-      });
+      const token = generateJwt(user.id, user.email, user.role);
       return res.json({ token });
     } catch (e) {
       console.log(e);
@@ -29,9 +33,22 @@ class UserController {
     }
   }
 
-  async login(req, res, next) {}
+  async login(req, res, next) {
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return next(ApiError.badRequest(`User not found`));
+    }
+    let comparePassword = bcrypt.compareSync(password, user.password);
+    if (!comparePassword) {
+      return next(ApiError.badRequest(`The password isn't correct`));
+    }
+    const token = generateJwt(user.id, user.email, user.role);
+    return res.json({ token });
+  }
 
   async check(req, res, next) {
+    return res.json({ message: 'All okay' });
     const { id } = req.query;
     if (!id) {
       return next(ApiError.badRequest("id isn't found"));
