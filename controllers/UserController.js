@@ -48,12 +48,8 @@ class UserController {
   }
 
   async check(req, res, next) {
-    return res.json({ message: 'All okay' });
-    const { id } = req.query;
-    if (!id) {
-      return next(ApiError.badRequest("id isn't found"));
-    }
-    res.json(id);
+    const token = generateJwt(req.user.id, req.user.email, req.user.role);
+    return res.json({ token });
   }
 }
 
